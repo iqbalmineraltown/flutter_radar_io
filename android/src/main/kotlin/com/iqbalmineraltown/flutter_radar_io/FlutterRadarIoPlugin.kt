@@ -11,7 +11,6 @@ import io.radar.sdk.Radar
 import io.radar.sdk.Radar.RadarTrackingOffline
 import io.radar.sdk.Radar.RadarTrackingPriority
 import io.radar.sdk.Radar.RadarTrackingSync
-import io.radar.sdk.Radar.startTracking
 import io.radar.sdk.RadarTrackingOptions
 import org.json.JSONObject
 
@@ -46,6 +45,31 @@ public class FlutterRadarIoPlugin: FlutterPlugin, MethodCallHandler {
       "getPlatformVersion" -> {
         result.success("Android ${android.os.Build.VERSION.RELEASE}")
       }
+      "initialize" -> {
+        val key = call.argument<String>("publishableKey")
+        initialize(key!!)
+      }
+      "setUserId" -> {
+        val userId = call.argument<String>("userId")
+        setUserId(userId!!)
+      }
+      "setMetadata" -> {
+        val metadata = call.argument<HashMap<Any,Any>>("metadata")
+        setMetadata(metadata!!)
+      }
+      "setDescription" -> {
+        val description = call.argument<String>("description")
+        setDescription(description!!)
+      }
+      "startBackgroundTracking" -> {
+        startBackgroundTracking()
+      }
+      "stopBackgroundTracking" -> {
+        stopBackgroundTracking()
+      }
+      "isBackgroundTracking" -> {
+        result.success(isBackgroundTracking())
+      }
       else -> {
         result.notImplemented()
       }
@@ -79,12 +103,13 @@ public class FlutterRadarIoPlugin: FlutterPlugin, MethodCallHandler {
     Radar.startTracking(trackingOptions)
   }
 
-    private fun stopBackgroundTracking() {
-        Radar.stopTracking();
-    }
+  private fun stopBackgroundTracking() {
+      Radar.stopTracking()
+  }
 
-
-
+  private fun isBackgroundTracking() : Boolean {
+    return Radar.isTracking()
+  }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
   }
