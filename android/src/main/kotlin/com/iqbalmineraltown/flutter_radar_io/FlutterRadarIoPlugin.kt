@@ -1,12 +1,20 @@
 package com.iqbalmineraltown.flutter_radar_io
 
-import androidx.annotation.NonNull;
+import androidx.annotation.NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
+import io.radar.sdk.Radar
+import io.radar.sdk.Radar.RadarTrackingOffline
+import io.radar.sdk.Radar.RadarTrackingPriority
+import io.radar.sdk.Radar.RadarTrackingSync
+import io.radar.sdk.Radar.startTracking
+import io.radar.sdk.RadarTrackingOptions
+import org.json.JSONObject
+
 
 /** FlutterRadarIoPlugin */
 public class FlutterRadarIoPlugin: FlutterPlugin, MethodCallHandler {
@@ -33,12 +41,50 @@ public class FlutterRadarIoPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
-    } else {
-      result.notImplemented()
+
+    when(call.method) {
+      "getPlatformVersion" -> {
+        result.success("Android ${android.os.Build.VERSION.RELEASE}")
+      }
+      else -> {
+        result.notImplemented()
+      }
     }
   }
+
+  private fun initialize(key: String) {
+    Radar.initialize(key)
+  }
+
+  private fun setUserId(userId: String) {
+    Radar.userId = userId
+  }
+
+  private fun setMetadata(metadata: HashMap<Any,Any>) {
+    val data = JSONObject(metadata)
+    Radar.metadata = data
+  }
+
+  private fun setDescription(description: String) {
+    Radar.description = description
+  }
+
+  private fun startBackgroundTracking(){
+    val trackingOptions = RadarTrackingOptions.Builder()
+            .priority(RadarTrackingPriority.RESPONSIVENESS) // use EFFICIENCY instead to reduce location update frequency
+            .offline(RadarTrackingOffline.REPLAY_STOPPED) // use REPLAY_OFF instead to disable offline replay
+            .sync(RadarTrackingSync.POSSIBLE_STATE_CHANGES) // use ALL instead to sync all location updates
+            .build()
+
+    Radar.startTracking(trackingOptions)
+  }
+
+    private fun stopBackgroundTracking() {
+        Radar.stopTracking();
+    }
+
+
+
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
   }
